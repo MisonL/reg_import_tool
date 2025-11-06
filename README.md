@@ -1,3 +1,5 @@
+<div align="center">
+
 # 静默注册表导入程序
 *A lightweight, silent Windows registry importer*
 
@@ -19,6 +21,8 @@
 | v1.0.0 | iflow CLI + GLM-4.6 | 初始版本开发 |
 | v1.0.1 | Claude Code + MiniMax-M2 | 代码优化、跨平台支持、自动化脚本 |
 | v1.1.0 | Claude Code + MiniMax-M2 | 新增注册表查询和导出功能 |
+
+</div>
 
 ---
 
