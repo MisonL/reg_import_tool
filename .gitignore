@@ -1,0 +1,54 @@
+# 编译输出
+*.exe
+*.o
+*.obj
+
+# 日志文件
+*.log
+reg_import_debug*.log
+
+# 编译临时文件
+*.tmp
+*.bak
+*~
+
+# IDE和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# 备份文件
+*.backup
+*.old
+*.orig
+
+# Visual Studio
+*.pdb
+*.ilk
+*.lib
+*.exp
+*.aps
+*.ncb
+*.opt
+*.suo
+*.user
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# 日志目录
+logs/
+*.log
