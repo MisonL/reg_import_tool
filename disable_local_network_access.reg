@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+; 关闭Chrome LocalNetworkAccessRestrictionsEnabled功能
+; 此策略禁用本地网络访问限制，允许网站访问本地网络设备而不需要用户权限提示
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome]
+"LocalNetworkAccessRestrictionsEnabled"=dword:00000000
