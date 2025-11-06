@@ -49,13 +49,18 @@ clang++ --target=x86_64-w64-mingw reg_import_silent.cpp -o reg_import_silent.exe
 #### Windows平台
 
 ```batch
+# 安装开发环境（首次使用）
+install_compiler.bat
+
 # 自动编译（推荐）
 compile.bat
-
-# 先安装编译器，再编译
-install_compiler.bat
-compile.bat
 ```
+
+**install_compiler.bat 功能**:
+- 自动检测已安装的编译器
+- 提供3种编译器选择：Visual Studio、MinGW-w64、TDM-GCC
+- 自动下载并静默安装
+- 配置环境变量
 
 `compile.bat` 会自动：
 1. 检测已安装的编译器（优先MSVC，其次MinGW）
@@ -85,6 +90,12 @@ x86_64-w64-mingw32-g++ -std=c++11 -Os -s -flto -fmerge-constants \
 rm version.o
 ```
 
+**install_compiler_macos.sh 功能**:
+- 自动检测系统和Homebrew
+- 安装或验证mingw-w64交叉编译器
+- 配置环境变量
+- 提供详细的使用说明
+
 ### 运行方式
 
 ```batch
@@ -108,7 +119,9 @@ reg_import_silent.exe --debug test.reg
 - **`version.rc`** - Windows资源文件，存储版本信息
 - **`compile.bat`** - Windows平台编译脚本，支持MSVC和MinGW（已优化）
 - **`compile_macos.sh`** - macOS平台交叉编译脚本（已优化）
-- **`disable_local_network_access.reg`** - 默认注册的注册表文件
+- **`install_compiler.bat`** - Windows平台开发环境搭建脚本
+- **`install_compiler_macos.sh`** - macOS平台开发环境搭建脚本
+- **`disable_local_network_access.reg`** - 默认注册的注册表文件（已忽略）
 
 ### 关键函数
 

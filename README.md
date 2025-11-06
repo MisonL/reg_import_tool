@@ -90,20 +90,46 @@ reg_import_silent.exe --debug *.reg              # 调试模式批量导入
 
 ### Windows平台
 
+#### 🛠️ 快速编译
+
 ```batch
 # 一键编译（自动检测编译器）
 compile.bat
 ```
 
+#### 📦 安装开发环境
+
+**使用自动化安装脚本**：
+
+```batch
+install_compiler.bat
+```
+
+此脚本将：
+- ✅ 自动检测已安装的编译器
+- ✅ 提供3种编译器选择：Visual Studio、MinGW-w64、TDM-GCC
+- ✅ 自动下载并静默安装选中的编译器
+- ✅ 配置环境变量
+
 **支持编译器**:
 - ✅ Visual Studio (MSVC) - 推荐
 - ✅ MinGW-w64
+- ✅ TDM-GCC
 
 ---
 
 ### macOS平台（交叉编译）
 
 #### 1️⃣ 安装交叉编译器
+
+**方式一：使用自动化脚本（推荐）**
+
+```bash
+chmod +x install_compiler_macos.sh
+./install_compiler_macos.sh
+```
+
+**方式二：手动安装**
 
 ```bash
 # 安装 mingw-w64
