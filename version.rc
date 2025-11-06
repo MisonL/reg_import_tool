@@ -1,6 +1,6 @@
 1 VERSIONINFO
-FILEVERSION 1,0,1,0
-PRODUCTVERSION 1,0,1,0
+FILEVERSION 1,1,0,0
+PRODUCTVERSION 1,1,0,0
 FILEOS 0x40004L
 FILETYPE 0x1L
 {
@@ -10,12 +10,12 @@ FILETYPE 0x1L
         {
             VALUE "CompanyName", "Mison"
             VALUE "FileDescription", "Silent Registry Import Tool"
-            VALUE "FileVersion", "1.0.1"
+            VALUE "FileVersion", "1.1.0"
             VALUE "InternalName", "reg_import_silent"
             VALUE "LegalCopyright", "Copyright (C) 2025 Mison"
             VALUE "OriginalFilename", "reg_import_silent.exe"
             VALUE "ProductName", "Silent Registry Import Tool"
-            VALUE "ProductVersion", "1.0.1"
+            VALUE "ProductVersion", "1.1.0"
         }
     }
     BLOCK "VarFileInfo"

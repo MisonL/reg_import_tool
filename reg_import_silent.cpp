@@ -3,13 +3,14 @@
  * 作者: Mison
  * 联系方式: 1360962086@qq.com
  * 许可证: MIT License
- * 版本: 1.0.1
- * 
+ * 版本: 1.1.0
+ *
  * 功能特点:
  * - 完全静默运行，无任何弹窗
  * - 支持命令行参数指定reg文件路径
  * - 支持通配符（*和?）批量导入
  * - 支持调试模式，详细日志记录
+ * - 新增：注册表查询功能（--query-registry）
  * - 无外部依赖项，单文件运行
  * - 兼容Windows 10/11
  */
@@ -26,9 +27,9 @@
 
 // 版本信息
 #define VERSION_MAJOR 1
-#define VERSION_MINOR 0
-#define VERSION_BUILD 1
-#define VERSION_STRING "1.0.1"
+#define VERSION_MINOR 1
+#define VERSION_BUILD 0
+#define VERSION_STRING "1.1.0"
 
 // 全局调试模式标志
 bool g_debugMode = false;

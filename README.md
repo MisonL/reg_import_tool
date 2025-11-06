@@ -3,7 +3,7 @@
 # 静默注册表导入程序
 *A lightweight, silent Windows registry importer*
 
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/MisonL/reg_import_tool)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/MisonL/reg_import_tool)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](#)
 [![C++](https://img.shields.io/badge/C++-11-blue.svg)](https://isocpp.org/)
