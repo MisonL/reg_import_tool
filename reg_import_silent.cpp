@@ -3,7 +3,7 @@
  * 作者: Mison
  * 联系方式: 1360962086@qq.com
  * 许可证: MIT License
- * 版本: 1.1.0
+ * 版本: 1.1.1
  *
  * 功能特点:
  * - 完全静默运行，无任何弹窗
@@ -11,6 +11,7 @@
  * - 支持通配符（*和?）批量导入
  * - 支持调试模式，详细日志记录
  * - 新增：注册表查询功能（--query-registry）
+ * - 新增：注册表导出功能（--export-registry）
  * - 无外部依赖项，单文件运行
  * - 兼容Windows 10/11
  */
@@ -28,8 +29,8 @@
 // 版本信息
 #define VERSION_MAJOR 1
 #define VERSION_MINOR 1
-#define VERSION_BUILD 0
-#define VERSION_STRING "1.1.0"
+#define VERSION_BUILD 1
+#define VERSION_STRING "1.1.1"
 
 // 全局调试模式标志
 bool g_debugMode = false;
@@ -38,6 +39,11 @@ std::ofstream g_logFile;
 // 注册表查询模式标志
 bool g_queryMode = false;
 std::string g_queryPath = "";
+
+// 注册表导出模式标志
+bool g_exportMode = false;
+std::string g_exportPath = "";
+std::string g_exportFile = "";
 
 // RAII类用于安全处理Windows句柄
 struct HandleRAII {
@@ -86,9 +92,10 @@ void ShowHelp() {
         "License: MIT License\n\n"
         "Usage: reg_import_silent.exe [options] [file_paths...]\n\n"
         "Options:\n"
-        "  --debug          Enable debug mode, generate detailed logs\n"
-        "  --query-registry <path>  Query registry path (auto-enables debug mode)\n"
-        "  --help           Show this help information\n\n"
+        "  --debug              Enable debug mode, generate detailed logs\n"
+        "  --query-registry <path>    Query registry path (auto-enables debug mode)\n"
+        "  --export-registry <path> [file]  Export registry path to file\n"
+        "  --help               Show this help information\n\n"
         "File Paths:\n"
         "  Support single or multiple reg file paths\n"
         "  Support wildcards (* and ?) for batch matching\n\n"
@@ -98,6 +105,8 @@ void ShowHelp() {
         "  reg_import_silent.exe *.reg                      # Import all reg files\n"
         "  reg_import_silent.exe --debug test1.reg          # Debug mode import\n"
         "  reg_import_silent.exe --query-registry HKLM\\SOFTWARE\\Microsoft  # Query registry\n"
+        "  reg_import_silent.exe --export-registry HKLM\\SOFTWARE\\Microsoft  # Export with auto filename\n"
+        "  reg_import_silent.exe --export-registry HKLM\\SOFTWARE\\Microsoft export.reg  # Export to specific file\n"
         "  reg_import_silent.exe --help                     # Show help\n\n"
         "Registry Path Examples:\n"
         "  HKLM\\SOFTWARE\\Microsoft          (HKEY_LOCAL_MACHINE)\n"
@@ -109,6 +118,7 @@ void ShowHelp() {
         "  - Program runs silently by default, no interface\n"
         "  - Debug mode generates timestamped log files\n"
         "  - Query mode shows all subkeys and values recursively\n"
+        "  - Export mode creates .reg file (overwrites existing)\n"
         "  - Support Windows 10/11\n"
         "  - No external dependencies\n"
         "  - Open source under MIT License\n";
@@ -387,6 +397,40 @@ void QueryRegistry(const std::string& path, int indent = 0, bool isRoot = true) 
     RegCloseKey(hKey);
 }
 
+// 导出注册表路径到文件
+bool ExportRegistry(const std::string& regPath, const std::string& outputFile) {
+    WriteLog("Starting registry export: " + regPath);
+    std::string command = "reg export \"" + regPath + "\" \"" + outputFile + "\" /y";
+    WriteLog("Executing command: " + command);
+
+    STARTUPINFOA si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;
+    ZeroMemory(&pi, sizeof(pi));
+
+    bool success = false;
+    if (CreateProcessA(NULL, (LPSTR)command.c_str(), NULL, NULL, FALSE,
+                      CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+        WriteLog("Process created successfully, waiting for completion...");
+        WaitForSingleObject(pi.hProcess, INFINITE);
+        DWORD exitCode;
+        if (GetExitCodeProcess(pi.hProcess, &exitCode) && exitCode == 0) {
+            success = true;
+            WriteLog("Registry export successful to: " + outputFile);
+        } else {
+            WriteLog("Registry export failed, exit code: " + std::to_string(exitCode));
+        }
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    } else {
+        WriteLog("Process creation failed, error code: " + std::to_string(GetLastError()));
+    }
+    return success;
+}
+
 // 静默导入单个reg文件
 bool ImportRegFile(const std::string& regFilePath) {
     WriteLog("Starting registry import: " + regFilePath);
@@ -479,6 +523,82 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         WriteLog("Query path: " + g_queryPath);
     }
 
+    // 检查是否包含--export-registry参数（需要单独处理，因为后面有路径和可选文件名）
+    size_t exportPos = cmdLine.find("--export-registry");
+    if (exportPos != std::string::npos) {
+        g_exportMode = true;
+
+        // 提取路径
+        size_t pathStart = exportPos + 16; // "--export-registry" 的长度
+        if (pathStart < cmdLine.length()) {
+            // 跳过路径前的空格
+            while (pathStart < cmdLine.length() && cmdLine[pathStart] == ' ') {
+                pathStart++;
+            }
+
+            // 检查是否指定了输出文件名
+            size_t spacePos = cmdLine.find(' ', pathStart);
+            if (spacePos != std::string::npos) {
+                // 有空格，可能指定了输出文件
+                g_exportPath = cmdLine.substr(pathStart, spacePos - pathStart);
+                size_t fileStart = spacePos + 1;
+                while (fileStart < cmdLine.length() && cmdLine[fileStart] == ' ') {
+                    fileStart++;
+                }
+                size_t fileEnd = cmdLine.find("--", fileStart);
+                if (fileEnd == std::string::npos) {
+                    g_exportFile = cmdLine.substr(fileStart);
+                } else {
+                    g_exportFile = cmdLine.substr(fileStart, fileEnd - fileStart);
+                }
+                while (!g_exportFile.empty() && g_exportFile.back() == ' ') {
+                    g_exportFile.pop_back();
+                }
+            } else {
+                // 没有空格，没有指定输出文件，使用默认文件名
+                size_t pathEnd = cmdLine.find("--", pathStart);
+                if (pathEnd == std::string::npos) {
+                    g_exportPath = cmdLine.substr(pathStart);
+                } else {
+                    g_exportPath = cmdLine.substr(pathStart, pathEnd - pathStart);
+                }
+                while (!g_exportPath.empty() && g_exportPath.back() == ' ') {
+                    g_exportPath.pop_back();
+                }
+            }
+        }
+
+        // 生成默认文件名（如果未指定）
+        if (g_exportFile.empty()) {
+            // 获取注册表路径的最后一部分作为文件名
+            size_t lastBackslash = g_exportPath.find_last_of("\\/");
+            std::string fileNameBase = (lastBackslash == std::string::npos) ?
+                g_exportPath : g_exportPath.substr(lastBackslash + 1);
+            // 替换路径分隔符为下划线
+            std::replace(fileNameBase.begin(), fileNameBase.end(), '\\', '_');
+            std::replace(fileNameBase.begin(), fileNameBase.end(), '/', '_');
+            g_exportFile = fileNameBase + "_" + std::to_string(std::time(nullptr)) + ".reg";
+        }
+
+        WriteLog("=== Registry export mode enabled ===");
+        WriteLog("Export path: " + g_exportPath);
+        WriteLog("Export file: " + g_exportFile);
+
+        // 移除--export-registry及其参数
+        size_t paramLen = 16 + g_exportPath.length() + g_exportFile.length() + 1;
+        cmdLine.erase(exportPos, paramLen);
+        // 去除多余空格
+        while (cmdLine.find("  ") != std::string::npos) {
+            cmdLine.replace(cmdLine.find("  "), 2, " ");
+        }
+        if (!cmdLine.empty() && cmdLine[0] == ' ') {
+            cmdLine.erase(0, 1);
+        }
+        if (!cmdLine.empty() && cmdLine[cmdLine.length() - 1] == ' ') {
+            cmdLine.erase(cmdLine.length() - 1, 1);
+        }
+    }
+
     // 检查是否包含--debug参数（支持任意位置）
     size_t debugPos = cmdLine.find("--debug");
     if (debugPos != std::string::npos) {
@@ -539,6 +659,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 std::string logPath = std::string(exePath) + "\\reg_import_debug_" + std::string(timestamp) + ".log";
                 g_logFile.open(logPath, std::ios::app);
                 WriteLog("=== Program started, debug mode enabled ===");
+                WriteLog("Version: " + std::string(VERSION_STRING));
             }
         }
     }
@@ -598,6 +719,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
     
     WriteLog("Total files to import: " + std::to_string(regFiles.size()));
+
+    // 如果是导出模式，执行注册表导出
+    if (g_exportMode) {
+        WriteLog("Executing registry export...");
+
+        // 确保输出文件有.reg扩展名
+        if (g_exportFile.rfind(".reg", 4) != g_exportFile.length() - 4) {
+            g_exportFile += ".reg";
+        }
+
+        bool exportSuccess = ExportRegistry(g_exportPath, g_exportFile);
+
+        WriteLog("Registry export completed: " + std::string(exportSuccess ? "success" : "failed"));
+        WriteLog("=== Program finished ===");
+
+        return exportSuccess ? 0 : 1;
+    }
 
     // 如果是查询模式，执行注册表查询
     if (g_queryMode) {
