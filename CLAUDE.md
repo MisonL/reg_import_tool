@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 这是一个用C++编写的Windows静默注册表导入工具，用于无界面地批量导入注册表文件。项目支持MSVC和MinGW编译器，完全基于Windows API实现，无外部依赖。
 
 **作者**: Mison
-**版本**: 1.0.1
+**版本**: 1.1.0
 **许可证**: MIT License
 
 > **重要说明**: 这是一个Windows原生程序，使用Windows API开发。虽然可以在macOS上使用交叉编译器编译，但生成的可执行文件只能在Windows系统上运行。
@@ -110,12 +110,21 @@ reg_import_silent.exe *.reg
 
 # 调试模式（生成日志）
 reg_import_silent.exe --debug test.reg
+
+# 查询注册表（自动启用debug模式）
+reg_import_silent.exe --query-registry HKLM\SOFTWARE\Microsoft
+
+# 导出注册表（自动生成文件名）
+reg_import_silent.exe --export-registry HKLM\SOFTWARE\Microsoft
+
+# 导出注册表（指定文件名）
+reg_import_silent.exe --export-registry HKLM\SOFTWARE\Microsoft my_settings.reg
 ```
 
 ## 代码架构
 
 ### 核心文件
-- **`reg_import_silent.cpp`** (330行) - 主程序，包含所有业务逻辑
+- **`reg_import_silent.cpp`** (830+行) - 主程序，包含所有业务逻辑
 - **`version.rc`** - Windows资源文件，存储版本信息
 - **`compile.bat`** - Windows平台编译脚本，支持MSVC和MinGW（已优化）
 - **`compile_macos.sh`** - macOS平台交叉编译脚本（已优化）
@@ -127,15 +136,27 @@ reg_import_silent.exe --debug test.reg
 
 **程序入口** (`WinMain`)
 - 解析命令行参数
-- 处理 `--debug`、`--help` 参数
+- 处理 `--debug`、`--query-registry`、`--export-registry`、`--help` 参数
 - 支持多文件和通配符匹配
-- 调度文件导入流程
+- 调度文件导入、查询、导出流程
 
 **核心导入逻辑** (`ImportRegFile`)
 - 使用 `reg import` 命令静默导入注册表
 - 通过 `CreateProcess` 创建隐藏进程
 - 等待进程完成并检查返回码
 - 失败时记录错误信息
+
+**注册表查询** (`QueryRegistry`)
+- 递归查询指定路径下的所有键、值和子键
+- 支持多种数据类型格式化显示
+- 使用Windows API (RegOpenKeyEx, RegEnumKeyEx, RegEnumValue)
+- 自动启用debug模式
+
+**注册表导出** (`ExportRegistry`)
+- 使用 `reg export` 命令导出注册表
+- 支持自动生成文件名或指定输出文件
+- 静默覆盖已存在文件
+- 完整日志记录
 
 **调试支持** (`WriteLog`)
 - 仅在 `--debug` 模式下启用
@@ -151,24 +172,28 @@ reg_import_silent.exe --debug test.reg
 
 1. **静默运行**: 默认无控制台窗口，完全后台执行
 2. **调试模式**: `--debug` 参数启用详细日志和控制台输出
-3. **批量处理**: 支持多文件和通配符批量导入
-4. **错误处理**: 捕获进程创建和执行错误，返回适当退出码
-5. **Windows集成**: 使用原生Windows API，无需额外依赖
+3. **注册表查询**: `--query-registry` 参数递归显示所有键值
+4. **注册表导出**: `--export-registry` 参数支持自动或指定文件名
+5. **批量处理**: 支持多文件和通配符批量导入
+6. **错误处理**: 捕获进程创建和执行错误，返回适当退出码
+7. **Windows集成**: 使用原生Windows API，无需额外依赖
 
 ## 开发指南
 
 ### 修改版本号
 需要同时更新以下位置：
-1. `reg_import_silent.cpp:25-28` - 版本宏定义
+1. `reg_import_silent.cpp:29-32` - 版本宏定义
 2. `version.rc:2-3` - 文件和产品版本
 3. `README.md:6` - 项目版本
 
 ### 添加新功能
 程序使用简单的过程式架构，主要逻辑集中在 `WinMain` 函数中。如需添加新功能：
 
-1. 在文件顶部添加全局变量（如 `g_debugMode`）
-2. 实现对应的处理函数
+1. 在文件顶部添加全局变量（如 `g_debugMode`、`g_queryMode`、`g_exportMode`）
+2. 实现对应的处理函数（如 `QueryRegistry`、`ExportRegistry`）
 3. 在 `WinMain` 中添加参数解析逻辑
+4. 按特定顺序处理参数：先处理需要路径的，再处理简单标记
+5. 确保日志记录版本号
 
 ### 编译注意事项
 
@@ -198,7 +223,22 @@ reg_import_silent.exe --debug test.reg
 - 文件路径解析是否正确
 - 通配符匹配是否完整
 - 注册表导入是否成功
+- 注册表查询功能是否正常
+- 注册表导出功能是否正常
 - 错误处理是否到位
+- 参数解析逻辑是否正确
+
+**测试示例**:
+```batch
+# 测试查询功能
+reg_import_silent.exe --query-registry HKLM\SOFTWARE\Microsoft
+
+# 测试导出功能
+reg_import_silent.exe --export-registry HKCU\Software
+
+# 测试导出到指定文件
+reg_import_silent.exe --export-registry HKLM\SOFTWARE\Microsoft test_export.reg
+```
 
 ## 许可证
 
