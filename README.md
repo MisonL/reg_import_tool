@@ -1,5 +1,3 @@
-<div align="center">
-
 # 静默注册表导入程序
 *A lightweight, silent Windows registry importer*
 
