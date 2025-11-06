@@ -14,9 +14,12 @@
 
 ---
 
-<div align="center">
+## 🤖 智能开发
 
-**🤖 智能开发** | Powered by Claude Code + MiniMax-M2
+| 版本 | 开发工具 | 描述 |
+|------|----------|------|
+| v1.0.0 | iflow CLI + GLM-4.6 | 初始版本开发 |
+| v1.0.1 | Claude Code + MiniMax-M2 | 代码优化、跨平台支持、自动化脚本 |
 
 ---
 
@@ -31,8 +34,6 @@
 ---
 
 > **⚠️ 重要说明**: 这是一个Windows原生程序，使用Windows API开发。可以在macOS上使用交叉编译器编译，但生成的可执行文件只能在Windows系统上运行。
-
-</div>
 
 ## ✨ 功能特点
 
@@ -203,8 +204,6 @@ rm version.o
 
 ## 💎 代码质量
 
-<div align="center">
-
 | 指标 | 状态 |
 |------|------|
 | ⚠️ 编译警告 | 零警告 ✅ |
@@ -214,8 +213,6 @@ rm version.o
 | 📏 代码规范 | C++ Core Guidelines ✅ |
 | ⚡ 性能优化 | LTO优化 ✅ |
 | 💾 文件大小 | 950KB (最小化) ✅ |
-
-</div>
 
 **编译标准**:
 ```bash
@@ -242,10 +239,6 @@ rm version.o
 
 ---
 
-<div align="center">
-
 **[⬆ 回到顶部](#静默注册表导入程序)**
 
 *如果这个项目对您有帮助，请给个⭐ Star！*
-
-</div>
