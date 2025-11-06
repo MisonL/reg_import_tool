@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](#)
 [![C++](https://img.shields.io/badge/C++-11-blue.svg)](https://isocpp.org/)
-[![Size](https://img.shields.io/badge/size-950KB-brightgreen.svg)](#)
+[![Size](https://img.shields.io/badge/size-964KB-brightgreen.svg)](#)
 
 **作者**: Mison
 **联系方式**: 1360962086@qq.com
@@ -42,8 +42,10 @@
 | 🔇 **完全静默** | 无弹窗、无托盘图标，后台运行 |
 | 📁 **灵活输入** | 支持单文件、多文件、通配符批量导入 |
 | 🔧 **调试支持** | 详细日志记录，便于问题排查 |
+| 🔍 **注册表查询** | --query-registry参数，递归显示所有键值 |
+| 📤 **注册表导出** | --export-registry参数，支持自动或指定文件名 |
 | 📦 **零依赖** | 静态链接，单文件可运行 |
-| 💾 **超小体积** | 优化后仅950KB |
+| 💾 **超小体积** | 优化后仅964KB |
 | ✅ **高兼容** | Windows 10/11 完美支持 |
 | 🛡️ **安全可靠** | RAII资源管理，线程安全 |
 | 📏 **代码规范** | 符合C++ Core Guidelines |
@@ -88,6 +90,18 @@ reg_import_silent.exe "C:\path\to\file.reg"      # 导入指定路径的文件
 reg_import_silent.exe *.reg                      # 导入当前目录所有reg文件
 reg_import_silent.exe test*.reg                  # 导入以test开头的reg文件
 reg_import_silent.exe C:\path\to\*.reg           # 导入指定目录下所有reg文件
+```
+
+### 查询注册表
+```
+reg_import_silent.exe --query-registry HKLM\SOFTWARE\Microsoft  # 查询注册表
+reg_import_silent.exe --query-registry HKCU\Software            # 查询当前用户软件键
+```
+
+### 导出注册表
+```
+reg_import_silent.exe --export-registry HKLM\SOFTWARE\Microsoft          # 导出（自动生成文件名）
+reg_import_silent.exe --export-registry HKCU\Software my_settings.reg   # 导出到指定文件
 ```
 
 ### 多文件导入

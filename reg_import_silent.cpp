@@ -585,7 +585,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         WriteLog("Export file: " + g_exportFile);
 
         // 移除--export-registry及其参数
-        size_t paramLen = 16 + g_exportPath.length() + g_exportFile.length() + 1;
+        // 重新解析确定实际使用的长度
+        size_t paramStart = exportPos;
+        size_t paramEnd = cmdLine.find("--", exportPos + 16);
+        if (paramEnd == std::string::npos) {
+            paramEnd = cmdLine.length();
+        }
+        // 回溯到参数开始位置
+        while (paramEnd > paramStart && cmdLine[paramEnd - 1] == ' ') {
+            paramEnd--;
+        }
+        size_t paramLen = paramEnd - paramStart;
         cmdLine.erase(exportPos, paramLen);
         // 去除多余空格
         while (cmdLine.find("  ") != std::string::npos) {
